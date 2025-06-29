@@ -4,13 +4,14 @@
 
 
 #pragma once
+#include "ECS/HelloECS.h"
 #include "SDL3/SDL_init.h"
 #include "rendering/Display.h"
 #include "systems/SystemManager.h"
 
 #include <memory>
 
-class Physics;
+class PhysicsSystem;
 class Game
 {
 public:
@@ -18,17 +19,19 @@ public:
 
     SDL_AppResult Start();
     SDL_AppResult Update();
-
+    SDL_AppResult GetState() const;
+    void WindowEvent(SDL_Event* event);
     void Shutdown();
 
-    SDL_AppResult GetState();
-
-    void WindowEvent(SDL_Event* event);
+private:
+    void CreateLevel();
 
 private:
-
+    EntityHandle paddleEntity = INVALID_ENTITY;
     Display display;
     SystemManager systemManager;
+    std::unique_ptr<HelloECS> ecs;
+
     SDL_AppResult currentAppState;
 
     Uint64 lastFrameTime;

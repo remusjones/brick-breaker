@@ -5,6 +5,7 @@
 
 #pragma once
 #include "CoreTypes.h"
+#include "SDL3/SDL_init.h"
 #include "SDL3/SDL_pixels.h"
 #include "SDL3/SDL_rect.h"
 #include "SDL3/SDL_render.h"
@@ -13,9 +14,9 @@
 
 
 
-struct DrawBrick
+struct DrawRect
 {
-    DrawBrick(const Position& position, const float& width, const float& height, const SDL_Color& color)
+    DrawRect(const Position& position, const float& width, const float& height, const SDL_Color& color)
            : rect{ position.x, position.y, width, height }, color(color)
     {
     }
@@ -46,7 +47,9 @@ struct DrawBall
 class Display
 {
 public:
-    Display() {}
+    Display();
+
+  SDL_AppResult Init();
 
     void PreRender();
     void Render();
@@ -55,6 +58,13 @@ public:
     SDL_Renderer* renderer;
     SDL_Window* window;
 
-    std::vector<DrawBrick> brickDrawList;
+    std::vector<DrawRect> rectDrawList;
     std::vector<DrawBall> ballDrawList;
+
+    int GetWindowWidth() const { return windowWidth; }
+    int GetWindowHeight() const {return windowHeight; }
+
+private:
+    int windowHeight;
+    int windowWidth;
 };

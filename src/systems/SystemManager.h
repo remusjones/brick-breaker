@@ -13,20 +13,20 @@ class SystemManager
 {
 public:
     template<typename TSystem, typename... Args>
-    TSystem* RegisterSystem(const char* systemName, Args&&... args)
+    TSystem* RegisterSystem(const std::string& systemName, Args&&... args)
     {
         auto system = std::make_shared<TSystem>(systemName, std::forward<Args>(args)...);
         systems.emplace(systemName, std::move(system));
         return system.get();
     }
 
-    void UnregisterSystem(const char* systemName)
+    void UnregisterSystem(const std::string& systemName)
     {
         systems.erase(systemName);
     }
 
     template<typename TSystem>
-    TSystem* GetSystem(const char* systemName)
+    TSystem* GetSystem(const std::string& systemName)
     {
         auto it = systems.find(systemName);
         if (it != systems.end())

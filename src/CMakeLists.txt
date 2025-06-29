@@ -1,9 +1,10 @@
 ﻿add_executable(${PROJECT_NAME}
-        systems/physics.cpp
+        systems/PhysicsSystem.cpp
         Game.cpp
         rendering/Display.cpp
-        input/InputManager.cpp
         main.cpp
+        systems/RenderSystem.cpp
+        systems/RenderSystem.h
 )
 target_sources(${PROJECT_NAME} PRIVATE main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE
