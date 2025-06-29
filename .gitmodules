@@ -1,0 +1,3 @@
+[submodule "HelloECS"]
+	path = HelloECS
+	url = git@github.com:remusjones/HelloECS.git
