@@ -111,7 +111,7 @@ void Game::WindowEvent(SDL_Event* event)
         currentAppState = SDL_APP_SUCCESS;
     }
 
-    if (abs(event->motion.xrel) > 0)
+    if (event->motion.type == SDL_EVENT_MOUSE_MOTION)
     {
         int width, height;
         SDL_GetWindowSize(display.window, &width, &height);
