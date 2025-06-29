@@ -3,7 +3,8 @@ project(brick_breaker)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_subdirectory(HelloECS)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+set(BUILD_SHARED_LIBS OFF)
 
-add_executable(brick_breaker main.cpp)
-target_link_libraries(brick_breaker PRIVATE HelloECS)
+add_subdirectory(vendored)
+add_subdirectory(src)
