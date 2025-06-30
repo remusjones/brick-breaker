@@ -5,6 +5,8 @@
         main.cpp
         systems/RenderSystem.cpp
         systems/RenderSystem.h
+        systems/LevelSystem.cpp
+        systems/LevelSystem.h
 )
 target_sources(${PROJECT_NAME} PRIVATE main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE

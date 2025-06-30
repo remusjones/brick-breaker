@@ -49,7 +49,7 @@ class Display
 public:
     Display();
 
-  SDL_AppResult Init();
+    SDL_AppResult Init();
 
     void PreRender();
     void Render();
@@ -64,7 +64,12 @@ public:
     int GetWindowWidth() const { return windowWidth; }
     int GetWindowHeight() const {return windowHeight; }
 
+    void SetLevelSize(float x, float y);
+
 private:
     int windowHeight;
     int windowWidth;
+
+    float levelWidth;
+    float levelHeight;
 };

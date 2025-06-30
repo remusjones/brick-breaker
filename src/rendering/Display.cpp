@@ -53,9 +53,14 @@ void Display::PreRender()
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 }
+
 void Display::Render()
 {
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    // Calculate scale factors
+    float scaleX = static_cast<float>(windowWidth) / static_cast<float>(levelWidth);
+    float scaleY = static_cast<float>(windowHeight) / static_cast<float>(levelHeight);
+
+    SDL_SetRenderScale(renderer, scaleX, scaleY);
 
     for (const auto& ball : ballDrawList)
     {
@@ -71,8 +76,15 @@ void Display::Render()
     SDL_RenderPresent(renderer);
 
 }
+
 void Display::PostRender()
 {
     ballDrawList.clear();
     rectDrawList.clear();
+}
+
+void Display::SetLevelSize(const float x, const float y)
+{
+    levelWidth = x;
+    levelHeight = y;
 }

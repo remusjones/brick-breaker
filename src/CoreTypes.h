@@ -36,7 +36,8 @@ struct MouseInput
     float mousePositionX;
 };
 
-//struct Physics
-//{
-//
-//};
+struct Level
+{
+    float width;
+    float height;
+};

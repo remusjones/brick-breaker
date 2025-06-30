@@ -11,6 +11,7 @@
 
 #include <memory>
 
+class LevelSystem;
 class PhysicsSystem;
 class Game
 {
@@ -26,14 +27,13 @@ public:
 private:
     void CreateLevel();
 
-private:
     EntityHandle paddleEntity = INVALID_ENTITY;
+    SDL_AppResult currentAppState;
+    Uint64 lastFrameTime;
+    float deltaTime;
+
     Display display;
     SystemManager systemManager;
     std::unique_ptr<HelloECS> ecs;
-
-    SDL_AppResult currentAppState;
-
-    Uint64 lastFrameTime;
-    float deltaTime;
+    LevelSystem* levelSystem;
 };
