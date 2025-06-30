@@ -17,7 +17,8 @@ public:
     {
         auto system = std::make_shared<TSystem>(systemName, std::forward<Args>(args)...);
         systems.emplace(systemName, std::move(system));
-        return system.get();
+
+        return GetSystem<TSystem>(systemName);
     }
 
     void UnregisterSystem(const std::string& systemName)
