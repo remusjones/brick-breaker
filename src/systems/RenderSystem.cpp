@@ -4,18 +4,22 @@
 
 #include "RenderSystem.h"
 
-#include <iostream>
-
 void RenderSystem::Init()
 {
 }
 
 void RenderSystem::Update(float deltaTime)
 {
-    auto rectangleView = ecs->GetView<Position, Rect, Color>();
-    rectangleView.Each([&](const EntityHandle& entity, const Position& position, const Rect& rect, const Color& color) {
-        DrawRect rectangle{position, rect.width, rect.height, SDL_Color(color.r, color.g, color.b, color.a)};
+    auto rectangleView = ecs->GetView<Position, Dimension, Color>();
+    rectangleView.Each([&](const EntityHandle& entity, const Position& position, const Dimension& rect, const Color& color) {
+        DrawRect rectangle{position, rect, SDL_Color(color.r, color.g, color.b, color.a)};
         display->rectDrawList.emplace_back(rectangle);
+    });
+
+    auto circleView = ecs->GetView<Position, Circle, Color>();
+    circleView.Each([&](const EntityHandle& entity, const Position& position, const Circle& circle, const Color& color) {
+        DrawBall circleDraw{position, circle};
+        display->ballDrawList.emplace_back(circleDraw);
     });
 }
 

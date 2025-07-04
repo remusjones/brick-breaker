@@ -16,8 +16,8 @@
 
 struct DrawRect
 {
-    DrawRect(const Position& position, const float& width, const float& height, const SDL_Color& color)
-           : rect{ position.x, position.y, width, height }, color(color)
+    DrawRect(const Vector2& position, const Dimension& rect, const SDL_Color& color)
+           : rect{ position.x, position.y, rect.width, rect.height }, color(color)
     {
     }
 
@@ -27,15 +27,15 @@ struct DrawRect
 
 struct DrawBall
 {
-    DrawBall(const Position& position, const float& radius)
+    DrawBall(const Vector2& position, const Circle& circle)
     {
-        constexpr int32_t segments = 16;
+        int32_t segments = 8 * circle.radius;
         for (int32_t i = 0; i < segments; ++i)
         {
             float theta = 2.0f * M_PI * i / segments;
             SDL_FPoint point;
-            point.x = position.x + radius * cosf(theta);
-            point.y = position.y + radius * sinf(theta);
+            point.x = position.x + circle.radius * cosf(theta);
+            point.y = position.y + circle.radius * sinf(theta);
             points.emplace_back(point);
         }
         points.push_back(points.front());

@@ -41,14 +41,6 @@ SDL_AppResult Display::Init()
 
 void Display::PreRender()
 {
-    Position pos(100, 100);
-    DrawBall ball1(pos, 2);
-
-    Position pos2(1, 100);
-    DrawRect brick1 (pos2, 10, 5, SDL_Color(255, 0, 0, 255));
-
-    ballDrawList.emplace_back(ball1);
-
     /* Draw the message */
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
@@ -57,15 +49,12 @@ void Display::PreRender()
 void Display::Render()
 {
     // Calculate scale factors
-    float scaleX = static_cast<float>(windowWidth) / static_cast<float>(levelWidth);
-    float scaleY = static_cast<float>(windowHeight) / static_cast<float>(levelHeight);
+    float scaleX = static_cast<float>(windowWidth) / levelWidth;
+    float scaleY = static_cast<float>(windowHeight) / levelHeight;
 
     SDL_SetRenderScale(renderer, scaleX, scaleY);
 
-    for (const auto& ball : ballDrawList)
-    {
-        SDL_RenderLines(renderer, ball.points.data(), ball.points.size());
-    }
+
 
     for (const auto& brick : rectDrawList)
     {
@@ -73,8 +62,14 @@ void Display::Render()
         SDL_RenderFillRect(renderer, &brick.rect);
     }
 
-    SDL_RenderPresent(renderer);
+    for (const auto& ball : ballDrawList)
+    {
+        // todo: use the color component
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderLines(renderer, ball.points.data(), ball.points.size());
+    }
 
+    SDL_RenderPresent(renderer);
 }
 
 void Display::PostRender()

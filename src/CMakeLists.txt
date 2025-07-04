@@ -7,6 +7,8 @@
         systems/RenderSystem.h
         systems/LevelSystem.cpp
         systems/LevelSystem.h
+        systems/InputManager.cpp
+        systems/InputManager.h
 )
 target_sources(${PROJECT_NAME} PRIVATE main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE

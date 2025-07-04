@@ -8,13 +8,13 @@
 #include "ECS/HelloECS.h"
 #include "System.h"
 
-
+class InputManager;
 class LevelSystem : public System
 {
 public:
-    explicit LevelSystem(const std::string_view& name, Display* inDisplay, HelloECS* inECS) : System(name), display(inDisplay), ecs(inECS) {}
+    explicit LevelSystem(const std::string_view& name, Display* inDisplay, HelloECS* inECS, InputManager* inInputManager);
 
-    void Init() override;
+  void Init() override;
     void Update(float deltaTime) override;
     void Shutdown() override;
     void SetMouseLocation(float x, float y) const;
@@ -22,6 +22,9 @@ public:
 private:
     Display* display;
     HelloECS* ecs;
+    InputManager* inputManager;
+
     EntityHandle paddleEntity = INVALID_ENTITY;
     EntityHandle levelEntity = INVALID_ENTITY;
+
 };

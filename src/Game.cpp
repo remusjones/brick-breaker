@@ -24,18 +24,17 @@ SDL_AppResult Game::Start()
     ecs = std::make_unique<HelloECS>();
     systemManager.RegisterSystem<PhysicsSystem>("physics", ecs.get());
     systemManager.RegisterSystem<RenderSystem>("render", &display, ecs.get());
-    levelSystem = systemManager.RegisterSystem<LevelSystem>("level", &display, ecs.get());
+    levelSystem = systemManager.RegisterSystem<LevelSystem>("level", &display, ecs.get(), &inputManager);
 
-
+    lastFrameTime = SDL_GetTicks();
     systemManager.Init();
     return currentAppState;
 }
 
 SDL_AppResult Game::Update()
 {
-    Uint64 currentFrameTime = SDL_GetPerformanceCounter();
-    Uint64 frequency = SDL_GetPerformanceFrequency();
-    deltaTime = static_cast<float>(currentFrameTime - lastFrameTime) / static_cast<float>(frequency);
+    Uint64 currentFrameTime = SDL_GetTicks();
+    deltaTime = static_cast<float>(currentFrameTime - lastFrameTime);
     lastFrameTime = currentFrameTime;
 
     systemManager.Update(deltaTime);
@@ -72,5 +71,11 @@ void Game::WindowEvent(SDL_Event* event)
     if (levelSystem && event->motion.type == SDL_EVENT_MOUSE_MOTION)
     {
         levelSystem->SetMouseLocation(event->motion.x, event->motion.y);
+    }
+
+    // only process mouse down events for simplicity
+    if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+    {
+        inputManager.ProcessInput(event->button);
     }
 }

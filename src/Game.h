@@ -5,6 +5,7 @@
 
 #pragma once
 #include "ECS/HelloECS.h"
+#include "InputManager.h"
 #include "SDL3/SDL_init.h"
 #include "rendering/Display.h"
 #include "systems/SystemManager.h"
@@ -34,6 +35,7 @@ private:
 
     Display display;
     SystemManager systemManager;
+    InputManager inputManager;
     std::unique_ptr<HelloECS> ecs;
     LevelSystem* levelSystem;
 };
