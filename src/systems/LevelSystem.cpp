@@ -4,11 +4,13 @@
 
 #include "LevelSystem.h"
 
+#include "ECS/HelloECS.h"
 #include "InputManager.h"
 LevelSystem::LevelSystem(const std::string_view &name, Display *inDisplay, HelloECS *inECS, InputManager *inInputManager)
     : System(name), display(inDisplay), ecs(inECS), inputManager(inInputManager)
 {
-
+    winText = "Win";
+    loseText = "Lose";
 }
 
 void LevelSystem::Init()
@@ -104,6 +106,33 @@ void LevelSystem::Update(float deltaTime)
         position.x = std::lerp(position.x, paddle.mousePositionX - rect.width / 2, paddle.paddleSpeed * deltaTime);
     });
 
+
+    // Win/loss conditions
+
+    // todo: ECS should provide component counts for things like this
+    bool lost = true;
+    auto ballView = ecs->GetView<Circle, Body>();
+    ballView.Each([&](const EntityHandle& handle, const Circle& circle, const Body& body) {
+        lost = false;
+    });
+
+    bool win = true;
+    auto brickView = ecs->GetView<Dimension, Position>();
+    brickView.Each([&](const EntityHandle& handle, const Dimension& dimension, const Position& position) {
+        if (handle == paddleEntity) return;
+
+        win = false;
+    });
+
+    if (lost)
+    {
+        display->textDrawList.push_back(loseText);
+    }
+
+    if (win)
+    {
+        display->textDrawList.push_back(winText);
+    }
 }
 
 void LevelSystem::Shutdown()

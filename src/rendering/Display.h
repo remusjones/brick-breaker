@@ -60,6 +60,7 @@ public:
 
     std::vector<DrawRect> rectDrawList;
     std::vector<DrawBall> ballDrawList;
+    std::vector<std::string_view> textDrawList;
 
     int GetWindowWidth() const { return windowWidth; }
     int GetWindowHeight() const {return windowHeight; }

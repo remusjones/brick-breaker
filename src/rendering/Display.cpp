@@ -69,6 +69,11 @@ void Display::Render()
         SDL_RenderLines(renderer, ball.points.data(), ball.points.size());
     }
 
+    for (const auto& text : textDrawList)
+    {
+        SDL_RenderDebugText(renderer, levelWidth / 2, levelHeight / 2, text.data());
+    }
+
     SDL_RenderPresent(renderer);
 }
 

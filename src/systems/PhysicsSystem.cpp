@@ -71,7 +71,6 @@ void PhysicsSystem::Update(float deltaTime)
         brickCollisions.emplace_back(handle, position, rect);
     });
 
-
     Level* level = ecs->GetComponent<Level>(levelEntity);
     auto ballPhysicsView = ecs->GetView<Position, Body, Circle>();
     ballPhysicsView.Each([&](const EntityHandle& handle, Position& position, Body& body, const Circle & circle) {
@@ -120,6 +119,11 @@ void PhysicsSystem::Update(float deltaTime)
             position.y = std::clamp<float>(position.y, 0, std::numeric_limits<float>::infinity());
         }
 
+        if (position.y > level->dimension.height)
+        {
+            // Ball has left the level, and will be destroyed
+            ecs->DestroyEntity(handle);
+        }
     });
 
 }
