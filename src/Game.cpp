@@ -18,10 +18,22 @@ Game::Game() : currentAppState(SDL_APP_FAILURE), lastFrameTime(0), deltaTime(0),
 SDL_AppResult Game::Start()
 {
     currentAppState = display.Init();
-    if (currentAppState != SDL_APP_CONTINUE)
-        return currentAppState;
+    if (currentAppState != SDL_APP_CONTINUE){ return currentAppState; }
 
+
+    // Preregister the ecs types here
     ecs = std::make_unique<HelloECS>();
+    ecs->RegisterComponent<Position>();
+    ecs->RegisterComponent<Attached>();
+    ecs->RegisterComponent<Body>();
+    ecs->RegisterComponent<Circle>();
+    ecs->RegisterComponent<Dimension>();
+    ecs->RegisterComponent<Level>();
+    ecs->RegisterComponent<Powerup>();
+    ecs->RegisterComponent<Color>();
+    ecs->RegisterComponent<Paddle>();
+    ecs->RegisterComponent<DestroyTag>();
+
     systemManager.RegisterSystem<PhysicsSystem>("physics", ecs.get());
     systemManager.RegisterSystem<RenderSystem>("render", &display, ecs.get());
     levelSystem = systemManager.RegisterSystem<LevelSystem>("level", &display, ecs.get(), &inputManager);
