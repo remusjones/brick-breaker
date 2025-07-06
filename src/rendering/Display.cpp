@@ -54,18 +54,16 @@ void Display::Render()
 
     SDL_SetRenderScale(renderer, scaleX, scaleY);
 
-
-
     for (const auto& brick : rectDrawList)
     {
         SDL_SetRenderDrawColor(renderer, brick.color.r, brick.color.g, brick.color.b, brick.color.a);
         SDL_RenderFillRect(renderer, &brick.rect);
     }
+    // todo: use the color component
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     for (const auto& ball : ballDrawList)
     {
-        // todo: use the color component
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderLines(renderer, ball.points.data(), ball.points.size());
     }
 

@@ -29,7 +29,7 @@ struct DrawBall
 {
     DrawBall(const Vector2& position, const Circle& circle)
     {
-        int32_t segments = 8 * circle.radius;
+        int32_t segments = 2 * circle.radius;
         for (int32_t i = 0; i < segments; ++i)
         {
             float theta = 2.0f * M_PI * i / segments;
