@@ -94,3 +94,8 @@ struct Paddle
 
     CallbackID paddleFireMouseCallbackID;
 };
+
+struct DestroyTag
+{
+    int dummy;
+};

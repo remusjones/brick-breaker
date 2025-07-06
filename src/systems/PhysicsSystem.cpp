@@ -23,10 +23,12 @@ void PhysicsSystem::Init()
 
 void PhysicsSystem::Update(float deltaTime)
 {
+    paddleCollisions.clear();
+    brickCollisions.clear();
+
     constexpr float gainPerPaddleHitScale = 0.99f;
     constexpr float gainPerBrickHitScale = 1.02f;
-    constexpr float gainPerBoundsHitScale = 1.0f; // Adjust if you want bounds to affect speed
-
+    constexpr float gainPerBoundsHitScale = 1.0f;
 
     // update all velocities
     // todo: good use-case for a .without filter to ignore attached bodies
@@ -35,97 +37,86 @@ void PhysicsSystem::Update(float deltaTime)
 
         position.x += body.velocity.x * deltaTime;
         position.y += body.velocity.y * deltaTime;
-    });
 
-    // update attachments
-    // this only really works if there is 1 level of attachment, and that's probably fine for this
-    auto attachedView = ecs->GetView<Position, Attached>();
-    attachedView.Each([&](const EntityHandle& handle, Position& position, const Attached& attached) {
-        if (const Position* parentPosition = ecs->GetComponent<Position>(attached.parent))
+        if (ecs->HasComponent<Attached>(handle))
         {
-            position = *parentPosition + attached.offset;
+            Attached* attached = ecs->GetComponent<Attached>(handle);
+            const Position* parentPosition = ecs->GetComponent<Position>(attached->parent);
+            position = *parentPosition + attached->offset;
         }
     });
 
-    struct CollisionQuery
-    {
-        EntityHandle handle;
-        Position position;
-        Dimension rect;
-    };
-
-    std::unordered_map<EntityHandle, CollisionQuery> paddleCollisions;
-    auto paddleCollision = ecs->GetView<Position, Dimension, Paddle>();
-    paddleCollision.Each([&](const EntityHandle& handle, const Position & position, const Dimension & rect, const Paddle& paddle) {
-        paddleCollisions[handle] = CollisionQuery(handle, position, rect);
-    });
-
-    // todo: another use-case for a .without in the ecs
-    std::vector<CollisionQuery> brickCollisions;
+    // Find all potential collisions
     auto rectCollisionView = ecs->GetView<Position, Dimension>();
     rectCollisionView.Each([&](const EntityHandle& handle, const Position& position, const Dimension& rect) {
-
-        // don't add paddles to the brick filter
-        if (paddleCollisions.contains(handle)) return;
+        if (ecs->HasComponent<Paddle>(handle))
+        {
+            paddleCollisions.emplace_back(CollisionQuery(handle, position, rect));
+            return;
+        }
 
         brickCollisions.emplace_back(handle, position, rect);
     });
 
     Level* level = ecs->GetComponent<Level>(levelEntity);
-    auto ballPhysicsView = ecs->GetView<Position, Body, Circle>();
-    ballPhysicsView.Each([&](const EntityHandle& handle, Position& position, Body& body, const Circle & circle) {
 
-        for (const CollisionQuery& paddle : paddleCollisions | std::views::values)
+    // iterate over all the balls and intersect with the bricks, paddles and world
+    auto ballPhysicsView = ecs->GetView<Position, Body, Circle>();
+    ballPhysicsView.Each([&](const EntityHandle& ballHandle, const Position& position, Body& body, const Circle& circle) {
+
+        Vector2 collisionNormal{};
+        for (const CollisionQuery& paddle : paddleCollisions)
         {
-            Vector2 collisionNormal;
             if (Intersection(paddle.position, paddle.rect, position, circle,collisionNormal))
             {
-                 float paddleCenter = paddle.position.x + paddle.rect.width * 0.5f;
-                 float hitOffset = (position.x - paddleCenter) / (paddle.rect.width * 0.5f);
+                const float paddleCenter = paddle.position.x + paddle.rect.width * 0.5f;
+                float hitOffset = (position.x - paddleCenter) / (paddle.rect.width * 0.5f);
 
-                 hitOffset = std::clamp(hitOffset, -1.0f, 1.0f);
+                hitOffset = std::clamp(hitOffset, -1.0f, 1.0f);
 
-                 constexpr float maxAngle = 60.0f * (M_PI / 180.0f);
+                constexpr float maxAngle = 60.0f * (M_PI / 180.0f);
 
-                 float angle = hitOffset * maxAngle;
-                 float speed = std::sqrt(body.velocity.x * body.velocity.x + body.velocity.y * body.velocity.y);
+                const float angle = hitOffset * maxAngle;
+                const float speed = std::sqrt(body.velocity.x * body.velocity.x + body.velocity.y * body.velocity.y);
 
-                 body.velocity.x = speed * std::sin(angle);
-                 body.velocity.y = -speed * std::cos(angle);
+                body.velocity.x = speed * std::sin(angle);
+                body.velocity.y = -speed * std::cos(angle);
 
-                 body.velocity = body.velocity * gainPerPaddleHitScale;
+                body.velocity = body.velocity * gainPerPaddleHitScale;
             }
         }
 
         for (const CollisionQuery& brick : brickCollisions)
         {
-            Vector2 collisionNormal;
+            if (ecs->HasComponent<DestroyTag>(brick.handle)) continue;
+
             if (Intersection(brick.position, brick.rect, position, circle,  collisionNormal))
             {
                 body.velocity = Reflect(body.velocity, collisionNormal) * gainPerBrickHitScale;
-                // todo: make this add a component instead, and handle drops in a different system before destroying it
-                ecs->DestroyEntity(brick.handle);
+
+                DestroyTag doomed{};
+                ecs->AddComponent<DestroyTag>(brick.handle, doomed);
                 break;
             }
         }
 
-        Vector2 collisionNormal;
         if (LevelBoundsIntersection(level->dimension, position, circle, collisionNormal))
         {
             body.velocity = Reflect(body.velocity, collisionNormal) * gainPerBoundsHitScale;
-
-            // Lock balls to playing space if they are intersecting or outside of the wall
-            position.x = std::clamp<float>(position.x, 0, level->dimension.width);
-            position.y = std::clamp<float>(position.y, 0, std::numeric_limits<float>::infinity());
         }
 
         if (position.y > level->dimension.height)
         {
-            // Ball has left the level, and will be destroyed
-            ecs->DestroyEntity(handle);
+            DestroyTag doomed{};
+            ecs->AddComponent<DestroyTag>(ballHandle, doomed);
         }
     });
 
+    auto doomedView = ecs->GetView<DestroyTag>();
+    doomedView.Each([&](const EntityHandle handle, const DestroyTag& destroyTag)
+    {
+        ecs->DestroyEntity(handle);
+    });
 }
 
 bool PhysicsSystem::Intersection(
