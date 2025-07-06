@@ -9,6 +9,10 @@
 
 class HelloECS;
 class InputManager;
+
+/*
+ * LevelSystem provides basic gameplay behaviour, such as level spawning, input usage and win/lose monitoring
+ */
 class LevelSystem : public System
 {
 public:
@@ -26,7 +30,6 @@ private:
 
     EntityHandle paddleEntity = INVALID_ENTITY;
     EntityHandle levelEntity = INVALID_ENTITY;
-
 
     std::string winText;
     std::string loseText;

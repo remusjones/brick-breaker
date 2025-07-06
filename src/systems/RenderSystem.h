@@ -8,6 +8,9 @@
 #include "ECS/HelloECS.h"
 #include "System.h"
 
+/*
+ * RenderSystem pushes draw lists to the renderer for drawing from archetypes within the ecs
+ */
 class RenderSystem : public System
 {
 public:

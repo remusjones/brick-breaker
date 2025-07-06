@@ -9,6 +9,10 @@
 #include <ranges>
 #include <unordered_map>
 
+/*
+ * Todo: This should probably be moved to the HelloECS module, and have a base constructor for an ECS handle
+ * Holds ownership of all systems, provides simple api for common functionality for systems
+ */
 class SystemManager
 {
 public:

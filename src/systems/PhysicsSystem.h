@@ -9,6 +9,9 @@
 class HelloECS;
 struct Dimension;
 
+/*
+ * PhysicsSystem provides simple rect vs circle collisions and handles collision events for gameplay
+ */
 class PhysicsSystem : public System
 {
     struct CollisionQuery

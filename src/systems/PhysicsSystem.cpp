@@ -26,12 +26,12 @@ void PhysicsSystem::Update(float deltaTime)
     paddleCollisions.clear();
     brickCollisions.clear();
 
-    constexpr float gainPerPaddleHitScale = 0.99f;
-    constexpr float gainPerBrickHitScale = 1.02f;
+    // basic configurations for the collision behaviour
+    constexpr float gainPerPaddleHitScale = 1.05f;
+    constexpr float gainPerBrickHitScale = 1.0f;
     constexpr float gainPerBoundsHitScale = 1.0f;
 
     // update all velocities
-    // todo: good use-case for a .without filter to ignore attached bodies
     auto velocityView = ecs->GetView<Position, Body>();
     velocityView.Each([&](const EntityHandle& handle, Position& position, Body & body) {
 
@@ -46,7 +46,7 @@ void PhysicsSystem::Update(float deltaTime)
         }
     });
 
-    // Find all potential collisions
+    // Find all potential collisions and apply them to collision arrays
     auto rectCollisionView = ecs->GetView<Position, Dimension>();
     rectCollisionView.Each([&](const EntityHandle& handle, const Position& position, const Dimension& rect) {
         if (ecs->HasComponent<Paddle>(handle))
@@ -64,6 +64,7 @@ void PhysicsSystem::Update(float deltaTime)
     auto ballPhysicsView = ecs->GetView<Position, Body, Circle>();
     ballPhysicsView.Each([&](const EntityHandle& ballHandle, const Position& position, Body& body, const Circle& circle) {
 
+        // loop over all paddles and apply reflection to overlapping balls, applying more angular velocity based on how far on the side the collision occurs
         Vector2 collisionNormal{};
         for (const CollisionQuery& paddle : paddleCollisions)
         {
@@ -86,6 +87,8 @@ void PhysicsSystem::Update(float deltaTime)
             }
         }
 
+        // iterate over all the bricks, and collision test them
+        // todo: consider adding this to a spatial system to avoid O(balls*bricks) complexity, scales poorly when stress testing
         for (const CollisionQuery& brick : brickCollisions)
         {
             if (ecs->HasComponent<DestroyTag>(brick.handle)) continue;
@@ -100,6 +103,7 @@ void PhysicsSystem::Update(float deltaTime)
             }
         }
 
+        // todo: this collision isn't robust enough to correctly handle clipping separation
         if (LevelBoundsIntersection(level->dimension, position, circle, collisionNormal))
         {
             body.velocity = Reflect(body.velocity, collisionNormal) * gainPerBoundsHitScale;

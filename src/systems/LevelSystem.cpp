@@ -53,7 +53,7 @@ void LevelSystem::Init()
     // create player paddle
     constexpr float paddleHeightPositionOffset = 25.f;
     constexpr float paddleHeight = 5.f;
-    constexpr float paddleWidth = 20.f;
+    constexpr float paddleWidth = 25.f;
     constexpr float paddleSpeed = 0.01f;
 
     paddleEntity = ecs->CreateEntity();
@@ -83,12 +83,13 @@ void LevelSystem::Init()
     ecs->AddComponent(ballHandle, ballColor);
 
 
+    constexpr float startingBallSpeed = -0.33f;
     // Configure the ball release on input down
     level.ballReleaseCallbackHandle = inputManager->RegisterMouseClickEvent(1, [ballHandle, this] {
         ecs->RemoveComponent<Attached>(ballHandle);
-        Body *body = ecs->GetComponent<Body>(ballHandle);
+        Body* body = ecs->GetComponent<Body>(ballHandle);
         Level* level = ecs->GetComponent<Level>(levelEntity);
-        body->velocity.y = -0.33f;
+        body->velocity.y = startingBallSpeed;
 
         inputManager->UnregisterMouseClickEvent(1, level->ballReleaseCallbackHandle);
     });
@@ -101,14 +102,14 @@ void LevelSystem::Init()
 
 void LevelSystem::Update(float deltaTime)
 {
+    // update paddle location based on last mouse location
     auto inputView = ecs->GetView<Position, Paddle, Dimension>();
     inputView.Each([&](const EntityHandle& entityHandle, Position& position, const Paddle& paddle, const Dimension& rect) {
         position.x = std::lerp(position.x, paddle.mousePositionX - rect.width / 2, paddle.paddleSpeed * deltaTime);
     });
 
 
-    // Win/loss conditions
-
+    // Placeholder Win/loss conditions for full game loop
     // todo: ECS should provide component counts for things like this
     bool lost = true;
     auto ballView = ecs->GetView<Circle, Body>();
@@ -128,7 +129,6 @@ void LevelSystem::Update(float deltaTime)
     {
         display->textDrawList.push_back(loseText);
     }
-
     if (win)
     {
         display->textDrawList.push_back(winText);

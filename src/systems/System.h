@@ -5,6 +5,10 @@
 #pragma once
 #include <string>
 
+/*
+ * Todo: This should probably be moved to the HelloECS module, and have a base constructor for an ECS handle
+ * Used to abstract features away into systems that can be ticked.
+ */
 class System
 {
 public:

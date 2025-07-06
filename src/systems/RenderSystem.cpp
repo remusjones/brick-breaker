@@ -16,6 +16,7 @@ void RenderSystem::Update(float deltaTime)
         display->rectDrawList.emplace_back(rectangle);
     });
 
+    // Todo: Color is not used here
     auto circleView = ecs->GetView<Position, Circle, Color>();
     circleView.Each([&](const EntityHandle& entity, const Position& position, const Circle& circle, const Color& color) {
         DrawBall circleDraw{position, circle};

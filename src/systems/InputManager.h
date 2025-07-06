@@ -13,6 +13,9 @@
 
 using CallbackID = size_t;
 
+/*
+ * InputManager is used to handle callbacks when input is sent from SDL Events
+ */
 class InputManager
 {
 public:
