@@ -6,7 +6,7 @@
 #include "SDL3/SDL_render.h"
 #include <SDL3/SDL.h>
 
-Display::Display() : renderer(nullptr), window(nullptr), windowHeight(0), windowWidth(0)
+Display::Display() : renderer(nullptr), window(nullptr), windowHeight(0), windowWidth(0), levelWidth(0), levelHeight(0)
 {
 }
 
@@ -79,6 +79,7 @@ void Display::PostRender()
 {
     ballDrawList.clear();
     rectDrawList.clear();
+    textDrawList.clear();
 }
 
 void Display::SetLevelSize(const float x, const float y)
