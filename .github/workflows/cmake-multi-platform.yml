@@ -10,6 +10,10 @@ on:
   release:
     types: [ created ]
 
+permissions:
+  contents: write
+  discussions: write
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -68,3 +72,4 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: ${{ steps.strings.outputs.build-output-dir }}/Release/brick_breaker.exe
+        token: ${{ secrets.GITHUB_TOKEN }}
