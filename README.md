@@ -1,7 +1,7 @@
 # brick-breaker
 
-> Small game project developed alongside [HelloECS](https://github.com/remusjones/HelloECS) to prove out the ECS, test for bugs and discover API requirements
+> Small game project developed alongside [HelloECS](https://github.com/remusjones/HelloECS) to prove out the ECS, test for bugs and discover API requirements.
 
-https://github.com/user-attachments/assets/fb11b42b-8741-4993-96fa-bb3b790999f7
+> The project was made with only 1 external dependency being SDL for visualization and basic windows functionality, everything else is made by me.
 
-![vlc_2Rvr3PZnx1](https://github.com/user-attachments/assets/daea77b0-eb2a-422e-af29-ef47ce3fee91)
+https://github.com/user-attachments/assets/4c4e70e8-361d-4f15-83a9-b1a8ca82a80f
