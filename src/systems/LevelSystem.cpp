@@ -7,6 +7,8 @@
 #include "ECS/HelloECS.h"
 #include "GameUtils.h"
 #include "InputManager.h"
+#include <algorithm>
+
 LevelSystem::LevelSystem(const std::string_view &name, Display *inDisplay, HelloECS *inECS, InputManager *inInputManager)
     : System(name), display(inDisplay), ecs(inECS), inputManager(inInputManager)
 {
