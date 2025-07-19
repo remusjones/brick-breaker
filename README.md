@@ -4,4 +4,4 @@
 
 > The project was made with only 1 external dependency being SDL for visualization and basic windows functionality, everything else is made by me.
 
-https://github.com/user-attachments/assets/fb11b42b-8741-4993-96fa-bb3b790999f7
+https://github.com/user-attachments/assets/4c4e70e8-361d-4f15-83a9-b1a8ca82a80f
