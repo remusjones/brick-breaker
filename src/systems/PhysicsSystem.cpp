@@ -8,7 +8,8 @@
 #include <cmath>
 #include <ranges>
 
-PhysicsSystem::PhysicsSystem(const std::string_view &name, HelloECS *inECS) : System(name), ecs(inECS)
+PhysicsSystem::PhysicsSystem(const std::string_view &name, HelloECS *inECS)
+    : System(name), ecs(inECS), levelEntity(0)
 {
 }
 
@@ -23,20 +24,31 @@ void PhysicsSystem::Init()
 
 void PhysicsSystem::Update(float deltaTime)
 {
+    // Do nothing
+}
+
+void PhysicsSystem::FixedUpdate(float fixedDeltaTime)
+{
+    // Ignore iteration outside of fixed delta step
     paddleCollisions.clear();
     brickCollisions.clear();
 
     // basic configurations for the collision behaviour
-    constexpr float gainPerPaddleHitScale = 1.05f;
+    constexpr float gainPerPaddleHitScale = 1.005f;
     constexpr float gainPerBrickHitScale = 1.0f;
     constexpr float gainPerBoundsHitScale = 1.0f;
 
+    // update paddle location based on last mouse location
+    auto inputView = ecs->GetView<Position, Paddle, Dimension>();
+    inputView.Each([&](const EntityHandle& entityHandle, Position& position, const Paddle& paddle, const Dimension& rect) {
+        position.x = std::lerp(position.x, paddle.mousePositionX - rect.width / 2, paddle.paddleSpeed * fixedDeltaTime);
+    });
+
     // update all velocities
     auto velocityView = ecs->GetView<Position, Body>();
-    velocityView.Each([&](const EntityHandle& handle, Position& position, Body & body) {
-
-        position.x += body.velocity.x * deltaTime;
-        position.y += body.velocity.y * deltaTime;
+    velocityView.Each([&](const EntityHandle& handle, Position& position, Body& body) {
+        position.x += body.velocity.x * fixedDeltaTime;
+        position.y += body.velocity.y * fixedDeltaTime;
 
         if (ecs->HasComponent<Attached>(handle))
         {
@@ -62,13 +74,12 @@ void PhysicsSystem::Update(float deltaTime)
 
     // iterate over all the balls and intersect with the bricks, paddles and world
     auto ballPhysicsView = ecs->GetView<Position, Body, Circle>();
-    ballPhysicsView.Each([&](const EntityHandle& ballHandle, const Position& position, Body& body, const Circle& circle) {
+    ballPhysicsView.Each([&](const EntityHandle& ballHandle, Position& position, Body& body, const Circle& circle) {
 
-        // loop over all paddles and apply reflection to overlapping balls, applying more angular velocity based on how far on the side the collision occurs
         Vector2 collisionNormal{};
-        for (const CollisionQuery& paddle : paddleCollisions)
+        for (const CollisionQuery &paddle : paddleCollisions)
         {
-            if (Intersection(paddle.position, paddle.rect, position, circle,collisionNormal))
+            if (Intersection(paddle.position, paddle.rect, position, circle, collisionNormal))
             {
                 const float paddleCenter = paddle.position.x + paddle.rect.width * 0.5f;
                 float hitOffset = (position.x - paddleCenter) / (paddle.rect.width * 0.5f);
@@ -88,12 +99,14 @@ void PhysicsSystem::Update(float deltaTime)
         }
 
         // iterate over all the bricks, and collision test them
-        // todo: consider adding this to a spatial system to avoid O(balls*bricks) complexity, scales poorly when stress testing
+        // todo: consider adding this to a spatial system to avoid O(balls*bricks) complexity, scales poorly when stress
+        // testing with a large ball amount
         for (const CollisionQuery& brick : brickCollisions)
         {
-            if (ecs->HasComponent<DestroyTag>(brick.handle)) continue;
+            if (ecs->HasComponent<DestroyTag>(brick.handle))
+                continue;
 
-            if (Intersection(brick.position, brick.rect, position, circle,  collisionNormal))
+            if (Intersection(brick.position, brick.rect, position, circle, collisionNormal))
             {
                 body.velocity = Reflect(body.velocity, collisionNormal) * gainPerBrickHitScale;
 
@@ -103,10 +116,27 @@ void PhysicsSystem::Update(float deltaTime)
             }
         }
 
-        // todo: this collision isn't robust enough to correctly handle clipping separation
         if (LevelBoundsIntersection(level->dimension, position, circle, collisionNormal))
         {
             body.velocity = Reflect(body.velocity, collisionNormal) * gainPerBoundsHitScale;
+
+            // Penetration test and separate the ball to avoid velocity normalization error where ball appears to hug
+            // the ceiling as it moves along it
+            float penetration = 0.0f;
+            if (position.x - circle.radius < 0.0f)
+            {
+                penetration = 0.0f - (position.x - circle.radius);
+            }
+            else if (position.x + circle.radius > level->dimension.width)
+            {
+                penetration = (position.x + circle.radius) - level->dimension.width;
+            }
+            else if (position.y - circle.radius < 0.0f)
+            {
+                penetration = 0.0f - (position.y - circle.radius);
+            }
+            position.x += collisionNormal.x * penetration;
+            position.y += collisionNormal.y * penetration;
         }
 
         if (position.y > level->dimension.height)
@@ -116,11 +146,9 @@ void PhysicsSystem::Update(float deltaTime)
         }
     });
 
+    // Iterate all entities that are pending destroy from collisions and destroy them here
     auto doomedView = ecs->GetView<DestroyTag>();
-    doomedView.Each([&](const EntityHandle handle, const DestroyTag& destroyTag)
-    {
-        ecs->DestroyEntity(handle);
-    });
+    doomedView.Each([&](const EntityHandle handle, const DestroyTag& destroyTag) { ecs->DestroyEntity(handle); });
 }
 
 bool PhysicsSystem::Intersection(

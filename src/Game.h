@@ -31,11 +31,16 @@ private:
     EntityHandle paddleEntity = INVALID_ENTITY;
     SDL_AppResult currentAppState;
     Uint64 lastFrameTime;
+    const float fixedDeltaTimeStep = 0.01;
     float deltaTime;
+    float deltaAccumulator;
+
 
     Display display;
     SystemManager systemManager;
     InputManager inputManager;
     std::unique_ptr<HelloECS> ecs;
     LevelSystem* levelSystem;
+    PhysicsSystem* physicsSystem;
+
 };

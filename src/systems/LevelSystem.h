@@ -21,7 +21,7 @@ public:
     void Init() override;
     void Update(float deltaTime) override;
     void Shutdown() override;
-    void SetMouseLocation(float x, float y) const;
+    void SetMouseLocation(float mouseX, float mouseY) const;
 
 private:
     Display* display;

@@ -6,20 +6,27 @@
 
 #include "LevelSystem.h"
 #include "RenderSystem.h"
-#include "SDL3/SDL_log.h"
+#include "SDL3/SDL.h"
 #include "SDL3/SDL_timer.h"
 #include "systems/PhysicsSystem.h"
-#include <SDL3/SDL.h>
 
-Game::Game() : currentAppState(SDL_APP_FAILURE), lastFrameTime(0), deltaTime(0), levelSystem(nullptr)
+
+#define MAX_ENTITIES 1000
+#define MAX_COMPONENTS 16
+#define AUTO_REGISTRATION false
+
+
+Game::Game()
+    : currentAppState(SDL_APP_FAILURE), lastFrameTime(0), deltaTime(0), deltaAccumulator(0),
+     levelSystem(nullptr), physicsSystem(nullptr)
 {
 }
 
 SDL_AppResult Game::Start()
 {
     currentAppState = display.Init();
-    if (currentAppState != SDL_APP_CONTINUE){ return currentAppState; }
 
+    if (currentAppState != SDL_APP_CONTINUE){ return currentAppState; }
 
     // Preregister the ecs types here
     ecs = std::make_unique<HelloECS>();
@@ -34,7 +41,7 @@ SDL_AppResult Game::Start()
     ecs->RegisterComponent<Paddle>();
     ecs->RegisterComponent<DestroyTag>();
 
-    systemManager.RegisterSystem<PhysicsSystem>("physics", ecs.get());
+    physicsSystem = systemManager.RegisterSystem<PhysicsSystem>("physics", ecs.get());
     systemManager.RegisterSystem<RenderSystem>("render", &display, ecs.get());
     levelSystem = systemManager.RegisterSystem<LevelSystem>("level", &display, ecs.get(), &inputManager);
 
@@ -45,9 +52,22 @@ SDL_AppResult Game::Start()
 
 SDL_AppResult Game::Update()
 {
-    Uint64 currentFrameTime = SDL_GetTicks();
-    deltaTime = static_cast<float>(currentFrameTime - lastFrameTime);
+    const Uint64 currentFrameTime = SDL_GetTicks();
+    constexpr float maximumDeltaTime = 0.1f;
+
+    // Reference https://gafferongames.com/post/fix_your_timestep/
+    deltaTime = static_cast<float>(currentFrameTime - lastFrameTime) / 1000.0f;
+    if (deltaTime > maximumDeltaTime)
+        deltaTime = maximumDeltaTime;
+
     lastFrameTime = currentFrameTime;
+
+    deltaAccumulator += deltaTime;
+    while (deltaAccumulator >= fixedDeltaTimeStep)
+    {
+        physicsSystem->FixedUpdate(fixedDeltaTimeStep);
+        deltaAccumulator -= fixedDeltaTimeStep;
+    }
 
     systemManager.Update(deltaTime);
 

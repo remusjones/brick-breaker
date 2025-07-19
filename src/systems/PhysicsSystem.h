@@ -26,6 +26,7 @@ public:
 
     void Init() override;
     void Update(float deltaTime) override;
+    void FixedUpdate(float fixedDeltaTime);
     void Shutdown() override;
 
     static bool Intersection(const Position& paddlePosition, const Dimension& paddleDimension, const Position& ballPosition, const Circle& circle, Vector2& outNormal);

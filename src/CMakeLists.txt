@@ -9,6 +9,7 @@
         systems/LevelSystem.h
         systems/InputManager.cpp
         systems/InputManager.h
+        GameUtils.h
 )
 target_sources(${PROJECT_NAME} PRIVATE main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE
