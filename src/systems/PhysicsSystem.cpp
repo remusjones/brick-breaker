@@ -7,6 +7,7 @@
 #include "ECS/HelloECS.h"
 #include <cmath>
 #include <ranges>
+#include <algorithm>
 
 PhysicsSystem::PhysicsSystem(const std::string_view &name, HelloECS *inECS)
     : System(name), ecs(inECS), levelEntity(0)
@@ -84,7 +85,7 @@ void PhysicsSystem::FixedUpdate(float fixedDeltaTime)
                 const float paddleCenter = paddle.position.x + paddle.rect.width * 0.5f;
                 float hitOffset = (position.x - paddleCenter) / (paddle.rect.width * 0.5f);
 
-                hitOffset = std::clamp(hitOffset, -1.0f, 1.0f);
+                hitOffset = std::clamp<float>(hitOffset, -1.0f, 1.0f);
 
                 constexpr float maxAngle = 60.0f * (M_PI / 180.0f);
 

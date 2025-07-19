@@ -2,7 +2,6 @@
 // Created by Remus on 29/06/2025.
 //
 
-
 #pragma once
 #include "CoreTypes.h"
 #include "SDL3/SDL_init.h"
@@ -62,8 +61,8 @@ public:
     std::vector<DrawBall> ballDrawList;
     std::vector<std::string_view> textDrawList;
 
-    int GetWindowWidth() const { return windowWidth; }
-    int GetWindowHeight() const {return windowHeight; }
+    [[nodiscard]] int GetWindowWidth() const { return windowWidth; }
+    [[nodiscard]] int GetWindowHeight() const { return windowHeight; }
 
     void SetLevelSize(float x, float y);
 

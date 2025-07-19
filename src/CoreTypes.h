@@ -4,14 +4,14 @@
 #pragma once
 #include "ECS/CoreTypes.h"
 #include "InputManager.h"
-
 #include <cmath>
+
+#define M_PI 3.14159265358979323846
 
 struct Vector2
 {
     float x;
     float y;
-
 
     Vector2 operator+(const Vector2& other) const
     {
